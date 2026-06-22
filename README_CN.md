@@ -8,6 +8,9 @@
 [![MuJoCo](https://img.shields.io/badge/MuJoCo-3.2.7-orange.svg?logo=mujoco)](https://mujoco.org/)
 [![License](https://img.shields.io/badge/license-Apache2.0-yellow.svg?logo=apache)](https://opensource.org/license/apache-2-0)
 
+> [!IMPORTANT]
+> **声明：** 本仓库代码源自 [rl_sar](https://github.com/fan-ziqi/rl_sar)，仅用于个人修改、训练及学习目的。
+
 [English document](README.md)
 
 本仓库提供了机器人强化学习算法的仿真验证与实物部署框架，适配四足机器人、轮足机器人、人形机器人。"sar"代表"simulation and real"

@@ -8,6 +8,9 @@
 [![MuJoCo](https://img.shields.io/badge/MuJoCo-3.2.7-orange.svg?logo=mujoco)](https://mujoco.org/)
 [![License](https://img.shields.io/badge/license-Apache2.0-yellow.svg?logo=apache)](https://opensource.org/license/apache-2-0)
 
+> [!IMPORTANT]
+> **Declaration:** This repository is cloned from [rl_sar](https://github.com/fan-ziqi/rl_sar) and is used solely for personal modification, training, and learning.
+
 [中文文档](README_CN.md)
 
 This repository provides a framework for simulation verification and physical deployment of robot reinforcement learning algorithms, suitable for quadruped robots, wheeled robots, and humanoid robots. "sar" stands for "simulation and real"
