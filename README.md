@@ -1,80 +1,72 @@
 # rl_sar
 
-[![Ubuntu 20.04/22.04](https://img.shields.io/badge/Ubuntu-20.04/22.04-blue.svg?logo=ubuntu)](https://ubuntu.com/)
-[![macOS](https://img.shields.io/badge/macOS-Experimental-orange.svg?logo=apple)](https://www.apple.com/macos/)
-[![ROS Noetic](https://img.shields.io/badge/ros-noetic-brightgreen.svg?logo=ros)](https://wiki.ros.org/noetic)
-[![ROS2 Foxy/Humble](https://img.shields.io/badge/ros2-foxy/humble-brightgreen.svg?logo=ros)](https://wiki.ros.org/foxy)
-[![Gazebo](https://img.shields.io/badge/Gazebo-Classic-lightgrey.svg?logo=gazebo)](http://gazebosim.org/)
-[![MuJoCo](https://img.shields.io/badge/MuJoCo-3.2.7-orange.svg?logo=mujoco)](https://mujoco.org/)
-[![License](https://img.shields.io/badge/license-Apache2.0-yellow.svg?logo=apache)](https://opensource.org/license/apache-2-0)
-
 > [!IMPORTANT]
-> **Declaration:** This repository is cloned from [rl_sar](https://github.com/fan-ziqi/rl_sar) and is used solely for personal modification, training, and learning.
+> **声明：** 本仓库代码源自 [rl_sar](https://github.com/fan-ziqi/rl_sar)，仅用于个人修改、训练及学习目的。
 
-[中文文档](README_CN.md)
+[English document](README.md)
 
-This repository provides a framework for simulation verification and physical deployment of robot reinforcement learning algorithms, suitable for quadruped robots, wheeled robots, and humanoid robots. "sar" stands for "simulation and real"
+本仓库提供了机器人强化学习算法的仿真验证与实物部署框架，适配四足机器人、轮足机器人、人形机器人。"sar"代表"simulation and real"。
 
-> Supports both **IsaacGym** and **IsaacSim**
->
-> Supports both **ROS-Noetic** and **ROS2-Foxy/Humble**
->
-> Supports both **libtorch** and **onnxruntime**
->
-> Supports both **Linux** and **macOS**(Only support Mujoco simulation)
->
-> Supports both **Gazebo** and **Mujoco**(Partial support)
->
-> Supports both **Locomotion** and **Dance**
+---
 
-Support List:
+## 开发历程与操作日志 (Development Log)
 
-|Robot Name (rname:=)|Pre-Trained Policy|Gazebo|Mujoco|Real|
-|-|-|-|-|-|
-|Unitree-A1 (a1)|legged_gym (IsaacGym)|✅|❌|✅|
-|Unitree-Go2 (go2)|himloco (IsaacGym)</br>robot_lab (IsaacSim)|✅|✅|✅</br>✅|
-|Unitree-Go2W (go2w)|robot_lab (IsaacSim)|✅|✅|✅|
-|Unitree-B2 (b2)|robot_lab (IsaacSim)|✅|✅|⚪|
-|Unitree-B2W (b2w)|robot_lab (IsaacSim)|✅|✅|⚪|
-|Unitree-G1 (g1)|robomimic/locomotion (IsaacGym)</br>robomimic/charleston (IsaacGym)</br>whole_body_tracking/dance_102 (IsaacSim)</br>whole_body_tracking/gangnam_style (IsaacSim)|✅|✅|✅|
-|FFTAI-GR1T1 (gr1t1)</br>(Only available on Ubuntu20.04)|legged_gym (IsaacGym)|✅|❌|⚪|
-|FFTAI-GR1T2 (gr1t2)</br>(Only available on Ubuntu20.04)|legged_gym (IsaacGym)|✅|❌|⚪|
-|zhinao-L4W4 (l4w4)|legged_gym (IsaacGym)|✅|❌|✅|
-|Deeprobotics-Lite3 (lite3)|himloco (IsaacGym)|✅|❌|✅|
-|Agibot-D1 (d1)|robot_lab (IsaacSim)|✅|✅|✅|
-|DDTRobot-Tita (tita)|robot_lab (IsaacSim)|✅|❌|⚪|
+### 步骤 1：仿真场景参数审计与物理模型对齐
+* **时间戳**：2026-06-22
+* **目的作用**：在进行 Sim2Sim 仿真演示前，定位 MuJoCo 与 Gazebo 场景文件，精确计算台阶高度，为步态一致性测试提供几何参考。
+* **关键文件**：
+  * MuJoCo 场景：`src/rl_sar_zoo/d1_description/mjcf/scene.xml`
+  * Gazebo 场景：`src/rl_sar/worlds/stairs.world`
+* **底层物理/数学原理**：
+  * **MuJoCo (MJCF)**：长方体几何 `<geom type="box">` 的 `size` 属性代表 **半长、半宽、半高 (half-lengths)**。绝对上表面高度计算公式：$Z_{top} = pos.z + size.z$。第一级台阶实际起步高度为 $0.02m + 0.15m = 0.17m$，其余台阶相对高度增量为 $0.15m$。
+  * **Gazebo (SDF)**：长方体几何 `<box><size>` 属性代表 **真实高 (full-lengths)**。绝对上表面高度计算公式：$Z_{top} = pos.z + \frac{size.z}{2}$。台阶相对高度增量为 $0.15m$。
 
-> [!IMPORTANT]
-> Python version temporarily suspended maintenance, please use [v2.3](https://github.com/fan-ziqi/rl_sar/releases/tag/v2.3) if necessary, may be re-released in the future.
+### 步骤 2：Git 远程仓库所有权迁移与配置
+* **时间戳**：2026-06-22
+* **目的作用**：将代码库置于个人 GitHub 空间管理下，建立规范的 Git 开发工作流。
+* **执行命令**：
+  ```bash
+  git remote rename origin upstream
+  git remote add origin git@github.com:fireowl-sw/rl_sar.git
+  git push -u origin --all
+  git push -u origin --tags
+  ```
+* **产生的变化**：原开源项目重命名为 `upstream` 用于跟踪上游更新；新增个人 GitHub 命名空间 `fireowl-sw` 下的 `rl_sar` 仓库为 `origin` 主仓库，完成全部代码与分支推送。
 
-> [!NOTE]
-> If you want to train policy using IsaacLab(IsaacSim), please use [robot_lab](https://github.com/fan-ziqi/robot_lab) project.
->
-> The order of joints in robot_lab cfg file `joint_names` is the same as that defined in `xxx/robot_lab/config.yaml` in this project.
->
-> Discuss in [Github Discussion](https://github.com/fan-ziqi/rl_sar/discussions) or [Discord](http://www.robotsfan.com/dc_rl_sar).
+### 步骤 3：Sim2Sim 本地仿真演示与闭环控制测试
+* **时间戳**：2026-06-22
+* **目的作用**：在 Windows 本地 WSL2 环境下启动双仿真引擎，调用宿主机 GPU 渲染，运行内置的智元 D1 强化学习控制权重，完成 Sim2Sim 步态控制闭环演示。
+* **执行命令**：
+  * **MuJoCo 演示**：
+    ```bash
+    ./cmake_build/bin/rl_sim_mujoco d1 scene
+    ```
+  * **Gazebo 演示**：
+    ```bash
+    ros2 launch rl_sar gazebo.launch.py rname:=d1
+    ros2 run rl_sar rl_sim
+    ```
 
-> [!CAUTION]
-> **Disclaimer: User acknowledges that all risks and consequences arising from using this code shall be solely borne by the user, the author assumes no liability for any direct or indirect damages, and proper safety measures must be implemented prior to operation.**
+---
 
-## Preparation
+## 准备工作 (Preparation)
 
-Clone the repository
+克隆本仓库及子模块：
 
 ```bash
 git clone --recursive --depth 1 https://github.com/fan-ziqi/rl_sar.git
 ```
 
-To update
+更新仓库及子模块至最新版本：
 
 ```bash
 git pull
 git submodule update --init --recursive --recommend-shallow --progress
 ```
 
-## Dependency
+## 依赖项 (Dependency)
 
-Install the required packages:
+安装系统所需依赖环境（支持 Ubuntu 或 macOS）：
 
 ```bash
 # Ubuntu
@@ -84,7 +76,7 @@ sudo apt install cmake g++ build-essential libyaml-cpp-dev libeigen3-dev libboos
 brew install boost lcm yaml-cpp tbb libomp pkg-config glfw
 ```
 
-If you need to use ROS, install the following dependency packages:
+若需运行 ROS/ROS2 仿真环境，请安装以下适配的依赖包：
 
 ```bash
 # ros-noetic (Ubuntu20.04)
@@ -94,39 +86,39 @@ sudo apt install ros-noetic-teleop-twist-keyboard ros-noetic-controller-interfac
 sudo apt install ros-$ROS_DISTRO-teleop-twist-keyboard ros-$ROS_DISTRO-ros2-control ros-$ROS_DISTRO-ros2-controllers ros-$ROS_DISTRO-control-toolbox ros-$ROS_DISTRO-robot-state-publisher ros-$ROS_DISTRO-joint-state-publisher-gui ros-$ROS_DISTRO-gazebo-ros2-control ros-$ROS_DISTRO-gazebo-ros-pkgs ros-$ROS_DISTRO-xacro
 ```
 
-## Compilation
+## 编译项目 (Compilation)
 
-Execute the following script in the project root directory to compile the entire project:
+在项目根目录下运行编译脚本：
 
 ```bash
 ./build.sh
 ```
 
-To compile specific packages individually, you can append the package names:
+如需单独编译特定功能包，可以在命令后附加包名：
 
 ```bash
 ./build.sh package1 package2
 ```
 
-To clean the build, use the following command. This will remove all compiled outputs and created symbolic links:
+清理全部编译输出和生成的软链接：
 
 ```bash
-./build.sh -c  # or ./build.sh --clean
+./build.sh -c  # 或 ./build.sh --clean
 ```
 
-If simulation is not needed and you only want to run on the robot, you can compile using CMake while disabling ROS (the compiled executables will be in `cmake_build/bin` and libraries in `cmake_build/lib`):
+如果不需要仿真环境而只进行硬件实物部署（仅使用 CMake 编译）：
 
 ```bash
-./build.sh -m  # or ./build.sh --cmake
+./build.sh -m  # 或 ./build.sh --cmake
 ```
 
-To use the Mujoco simulator
+开启 MuJoCo 仿真器支持进行编译：
 
 ```bash
-./build.sh -mj  # or ./build.sh --mujoco
+./build.sh -mj  # 或 ./build.sh --mujoco
 ```
 
-For detailed usage instructions, you can check them via `./build.sh -h`:
+查看编译脚本的详细参数帮助：
 
 ```bash
 Usage: ./build.sh [OPTIONS] [PACKAGE_NAMES...]
@@ -135,31 +127,18 @@ Options:
   -c, --clean    Clean workspace (remove symlinks and build artifacts)
   -m, --cmake    Build using CMake (for hardware deployment only)
   -mj,--mujoco   Build with MuJoCo simulator support (CMake only)"
-  -h, --help     Show this help message
-
-Examples:
-  ./build.sh                    # Build all ROS packages
-  ./build.sh package1 package2  # Build specific ROS packages
-  ./build.sh -c                 # Clean all symlinks and build artifacts
-  ./build.sh --clean package1   # Clean specific package and build artifacts
-  ./build.sh -m                 # Build with CMake for hardware deployment
-  ./build.sh -mj                # Build with CMake and MuJoCo simulator support
+  -h, --help     Show this message
 ```
 
-> [!TIP]
-> If catkin build report errors: `Unable to find either executable 'empy' or Python module 'em'`, run `catkin config -DPYTHON_EXECUTABLE=/usr/bin/python3` before `catkin build`
+## 运行仿真与程序 (Running)
 
-## Running
+请将训练好的权重文件复制到指定目录 `policy/<ROBOT>/<CONFIG>`，并对应修改 `policy/<ROBOT>/base.yaml` 及 `config.yaml` 配置文件。
 
-In the following text, **\<ROBOT\>/\<CONFIG\>** is used to represent different environments, such as `go2/himloco` and `go2w/robot_lab`.
+### 仿真运行 (Simulation)
 
-Before running, copy the trained pt model file to `rl_sar/src/rl_sar/policy/<ROBOT>/<CONFIG>`, and configure the parameters in `<ROBOT>/<CONFIG>/config.yaml` and `<ROBOT>/base.yaml`.
+#### Gazebo 仿真
 
-### Simulation
-
-#### Gazebo
-
-Open a terminal, launch the gazebo simulation environment
+启动 Gazebo 仿真物理场景：
 
 ```bash
 # ROS1
@@ -171,7 +150,7 @@ source install/setup.bash
 ros2 launch rl_sar gazebo.launch.py rname:=<ROBOT>
 ```
 
-Open a new terminal, launch the control program
+打开新终端，启动强化学习控制节点：
 
 ```bash
 # ROS1
@@ -183,61 +162,58 @@ source install/setup.bash
 ros2 run rl_sar rl_sim
 ```
 
-> [!TIP]
-> **IMPORTANT:** After launching Gazebo, you must launch `rl_sim` in a separate terminal to control the robot. Without `rl_sim`, the robot will not be controlled and may fall over.
->
-> If you cannot see the robot after launching Gazebo in Ubuntu 22.04, it means the robot was initialized outside the field of view. The robot's position will be automatically reset after launching rl_sim. If the robot falls over during the standing process, use the keyboard `R` or the gamepad `RB+Y` to reset the robot.
-
-If Gazebo cannot be opened when you start it for the first time, you need to download the model package
+首次运行 Gazebo 时若无法正常显示模型，需下载官方模型包：
 
 ```bash
 git clone https://github.com/osrf/gazebo_models.git ~/.gazebo/models
 ```
 
-#### Mujoco
+#### Mujoco 仿真
+
+运行基于 MuJoCo 的物理仿真程序，需传入机器人名称与场景名称：
 
 ```bash
 ./cmake_build/bin/rl_sim_mujoco <ROBOT> <SCENE>
-# Example: ./cmake_build/bin/rl_sim_mujoco g1 scene_29dof
+# 例如: ./cmake_build/bin/rl_sim_mujoco g1 scene_29dof
 ```
 
-#### Docker
+#### Docker 容器运行
 
-Docker support is available for simulation and deployment. See [docker/README.md](docker/README.md) for details.
+在 Docker 容器中运行仿真与测试：
 
 ```bash
-# Start container
-xhost +local:docker  # Enable X11 on host
+# 启动容器并启用 X11 转发显示
+xhost +local:docker
 cd docker && docker compose up -d
 docker compose exec rl_sar bash
 
-# Inside container - MuJoCo
+# 在容器内启动 MuJoCo 仿真
 ./cmake_build/bin/rl_sim_mujoco g1 scene_29dof
 
-# Inside container - Gazebo
+# 在容器内启动 Gazebo 仿真
 ros2 launch rl_sar gazebo.launch.py rname:=go2
-# (new terminal) ros2 run rl_sar rl_sim
+# (新终端中运行) ros2 run rl_sar rl_sim
 
-# Inside container - Real robot
+# 在容器内启动实物控制
 ./cmake_build/bin/rl_real_go2 <NETWORK_INTERFACE>
 ```
 
-### Control with Mobile Web (Experimental)
+### 网页移动端控制 (Mobile Web Control)
 
-Install dependencies
+安装移动端网页控制桥接所需的依赖包：
 
 ```bash
 sudo apt install ros-${ROS_DISTRO}-rosbridge-suite
 sudo apt install ros-${ROS_DISTRO}-web-video-server
 
-# If you are using a ROS2 version other than Humble, Jazz, and Rolling, you need to build `web_video_server` from source
+# 若使用 Humble/Jazz/Rolling 以外的 ROS2 版本，需从源码编译 web_video_server
 cd <your_ros2_workspace>/src
 git clone https://github.com/RobotWebTools/web_video_server.git
 cd <your_ros2_workspace>
 colcon build --packages-select web_video_server
 ```
 
-Run rosbridge and web_video_server in robot
+在机器人端运行控制桥接节点：
 
 ```bash
 # ROS1
@@ -249,52 +225,49 @@ ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ros2 run web_video_server web_video_server
 ```
 
-Visit [http://robot.robotsfan.com/](http://robot.robotsfan.com/), fill in the IP address and port, check the settings page in the upper right corner, then connect to the robot. After entering the control page, turn the screen horizontally and click the full screen button in the upper left corner, Then you can control the robot using your phone's browser!
+在手机端浏览器访问 [http://robot.robotsfan.com/](http://robot.robotsfan.com/)，输入机器人 IP 与端口进行连接和方向手势控制。
 
-### Control with Gamepad or Keyboard
+### 键盘及手柄控制映射 (Gamepad & Keyboard Control)
 
-|Gamepad Control|Keyboard Control|Description|
+仿真与实物控制过程中的键盘/手柄键位映射表如下：
+
+| 手柄控制 (Gamepad) | 键盘控制 (Keyboard) | 功能描述 |
 |---|---|---|
-|**Basic**|||
-|A|Num0|Move the robot from its initial program pose to the `default_dof_pos` defined in `base.yaml` using position control interpolation|
-|B|Num9|Move the robot from its current position to the initial program pose using position control interpolation|
-|X|N|Toggle navigation mode (disables velocity commands, receives `cmd_vel` topic)|
+|**基础状态控制**|||
+|A|Num0|插值驱动机器人从程序初始位姿站立到 `base.yaml` 中的默认关节位置 `default_dof_pos`|
+|B|Num9|插值驱动机器人从当前位姿安全趴下并回到程序初始位姿|
+|X|N|开启导航模式（屏蔽手柄摇杆输入，接受外部 `cmd_vel` 速度话题控制）|
 |Y|N/A|N/A|
-|**Simulation**|||
-|RB+Y|R|Reset Gazebo environment (stand up fallen robot)|
-|RB+X|Enter|Toggle Gazebo run/stop (default: running state)|
-|**Motor**|||
-|LB+A|M|N/A (Recommended for motor enable)|
-|LB+B|K|N/A (Recommended for motor disable)|
-|LB+X|P|N/A Motor passive mode (`kp=0, kd=8`)|
-|LB+RB|N/A|N/A (Recommended for emergency stop)|
-|**Skill**|||
-|RB+DPadUp|Num1|Basic Locomotion|
-|RB+DPadDown|Num2|Skill 2|
-|RB+DPadLeft|Num3|Skill 3|
-|RB+DPadRight|Num4|Skill 4|
-|LB+DPadUp|Num5|Skill 5|
-|LB+DPadDown|Num6|Skill 6|
-|LB+DPadLeft|Num7|Skill 7|
-|LB+DPadRight|Num8|Skill 8|
-|**Movement**|||
-|LY Axis|W/S|Forward/Backward movement (X-axis)|
-|LX Axis|A/D|Left/Right movement (Y-axis)|
-|RX Axis|Q/E|Yaw rotation|
-|N/A (Release joystick)|Space|Reset all control commands to zero|
+|**仿真操作**|||
+|RB+Y|R|重置 Gazebo 仿真环境（当机器人摔倒时使其复位站立）|
+|RB+X|Enter|开启/暂停 Gazebo 物理仿真循环（默认：开启状态）|
+|**电机使能控制**|||
+|LB+A|M|电机使能 (Motor enable)|
+|LB+B|K|电机脱机/失能 (Motor disable)|
+|LB+X|P|电机阻尼模式/被动状态 (Motor passive mode: `kp=0, kd=8`)|
+|LB+RB|N/A|机器人紧急急停销控 (Emergency stop)|
+|**步态与动作技能切换**|||
+|RB+DPadUp|Num1|基础行走步态 (Basic Locomotion)|
+|RB+DPadDown|Num2|技能动作 2 (Skill 2)|
+|RB+DPadLeft|Num3|技能动作 3 (Skill 3)|
+|RB+DPadRight|Num4|技能动作 4 (Skill 4)|
+|LB+DPadUp|Num5|技能动作 5 (Skill 5)|
+|LB+DPadDown|Num6|技能动作 6 (Skill 6)|
+|LB+DPadLeft|Num7|技能动作 7 (Skill 7)|
+|LB+DPadRight|Num8|技能动作 8 (Skill 8)|
+|**运动速度输入**|||
+|LY 摇杆|W/S|前后移动速度控制 (X 轴)|
+|LX 摇杆|A/D|左右平移速度控制 (Y 轴)|
+|RX 摇杆|Q/E|偏航角角速度控制 (Yaw 旋转)|
+|摇杆回中|Space|清除当前全部速度控制命令为 0|
 
-### Real Robots
+### 物理实物部署 (Real Robots)
 
 <details>
 
-<summary>Unitree A1 (Click to expand)</summary>
+<summary>Unitree A1 控制部署 (点击展开)</summary>
 
-Unitree A1 can be connected using both wireless and wired methods:
-
-- Wireless: Connect to the Unitree starting with WIFI broadcasted by the robot **(Note: Wireless connection may lead to packet loss, disconnection, or even loss of control, please ensure safety)**
-- Wired: Use an Ethernet cable to connect any port on the computer and the robot, configure the computer IP as 192.168.123.162, and the netmask as 255.255.255.0
-
-Open a new terminal and start the control program
+连接网线配置 PC 的 IP 处于 `192.168.123.X` 网段，并运行实物部署程序：
 
 ```bash
 # ROS1
@@ -313,17 +286,11 @@ ros2 run rl_sar rl_real_a1
 
 <details>
 
-<summary>Unitree Go2/Go2W/G1(29dofs) (Click to expand)</summary>
+<summary>Unitree Go2/Go2W/G1(29dofs) 控制部署 (点击展开)</summary>
 
-#### Ethernet Connection
+#### 网线连接
 
-Connect one end of the Ethernet cable to the Go2/Go2W/G1(29dofs) robot and the other end to your computer. Then, enable USB Ethernet on the computer and configure it. The IP address of the onboard computer on the Go2 robot is `192.168.123.161`, so the computer's USB Ethernet address should be set to the same network segment as the robot. For example, enter `192.168.123.222` in the "Address" field (you can replace `222` with another number).
-
-Use the `ifconfig` command to find the name of the network interface for the 123 network segment, such as `enxf8e43b808e06`. In the following steps, replace `<YOUR_NETWORK_INTERFACE>` with the actual network interface name.
-
-Go2:
-
-Open a new terminal and start the control program. If you are controlling Go2W, you need to add `wheel` after the command, otherwise leave it blank.
+连接网线并配置电脑 USB 以太网 IP 为 `192.168.123.222`（网关为 `255.255.255.0`）。查询网卡接口名称，并启动对应的控制程序：
 
 ```bash
 # ROS1
@@ -338,9 +305,7 @@ ros2 run rl_sar rl_real_go2 <YOUR_NETWORK_INTERFACE> [wheel]
 ./cmake_build/bin/rl_real_go2 <YOUR_NETWORK_INTERFACE> [wheel]
 ```
 
-G1(29dofs):
-
-Turn on the robot and lift it up, press L2+R2 to enter the debugging mode, then open a new terminal and start the control program.
+G1 人形机器人 (29dofs)：
 
 ```bash
 # ROS1
@@ -355,37 +320,29 @@ ros2 run rl_sar rl_real_g1 <YOUR_NETWORK_INTERFACE>
 ./cmake_build/bin/rl_real_g1 <YOUR_NETWORK_INTERFACE>
 ```
 
-#### Deploying on the Onboard Jetson
+#### 在板载电脑 (Jetson) 部署
 
-Connect your computer to the robot using the Ethernet cable and log into the Jetson onboard computer. The default password is `123`:
+通过 SSH 登录机器人板载电脑，在板载端构建并运行控制程序：
 
 ```bash
 ssh unitree@192.168.123.18
 ```
 
-Connect the phone to the USB of the robot, enable USB network sharing on the phone, pull the code and compile it using `./build.sh -m`. After successful compilation, run:
-
 ```bash
-# Go2:
+# 编译并运行
+./build.sh -m
 ./cmake_build/bin/rl_real_go2 <YOUR_NETWORK_INTERFACE> [wheel]
-
-# G1(29dofs):
-./cmake_build/bin/rl_real_g1 <YOUR_NETWORK_INTERFACE>
 ```
 
-Then you can unplug the phone and network cable, and control the robot using the remote controller.
+#### 开机自启动配置
 
-#### Auto-Start on Boot
-
-If you need to set up auto-start on boot, you can follow this process:
-
-Create a service file
+编写 systemd 服务文件配置自启动：
 
 ```bash
 sudo touch /etc/systemd/system/rl_sar.service
 ```
 
-Write the following content, assuming the rl_sar project is in the `~/rl_sar` directory
+在自启动服务文件中填入如下配置：
 
 ```
 [Unit]
@@ -406,71 +363,38 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Reload the systemd configuration:
+通过 systemctl 进行开机启动的生命周期管理：
 
 ```bash
+# 重载系统服务
 sudo systemctl daemon-reload
-```
 
-Enable auto-start on boot:
-
-```bash
+# 开启开机自启动
 sudo systemctl enable rl_sar.service
-```
 
-Disable auto-start on boot:
-
-```bash
+# 关闭开机自启动
 sudo systemctl disable rl_sar.service
-```
 
-Start the service:
-
-```bash
+# 启动服务
 sudo systemctl start rl_sar.service
-```
 
-Stop the service:
-
-```bash
+# 停止服务
 sudo systemctl stop rl_sar.service
-```
 
-Restart the service:
-
-```bash
+# 重启服务
 sudo systemctl restart rl_sar.service
-```
 
-View service logs:
-
-```bash
+# 查看日志
 sudo journalctl -u rl_sar.service -f
 ```
-
-After reboot, the robot will first run the built-in standing program. After the rl_sar service starts, it will automatically dampen down, and then can be controlled normally using the remote controller.
 
 </details>
 
 <details>
 
-<summary>Deeprobotics Lite3 (Click to expand)</summary>
+<summary>Deeprobotics Lite3 控制部署 (点击展开)</summary>
 
-Deeprobotics Lite3 can be connected using wireless method.
-(Wired not tested. For some versions of Lite3, the wired Ethernet port may requires additional installation.)
-
-- Connect to the Lite3 starting with WIFI broadcasted by the robot. We strongly recommand testing the communication the Lite3 using [Lite3_Motion_SDK](https://github.com/DeepRoboticsLab/Lite3_MotionSDK) before use.
- **(Note: Wireless connection may lead to packet loss, disconnection, or even loss of control, please ensure safety)**
-
-- Determine the IP address and port number of Lite3, and modify **line 46-48 in rl_sar/src/rl_real_lite3.cpp**.
-- Then Update **jy_exe/conf/network.toml** on the Lite3 motion host to set the IP and port to that of the local machine running ROS2, enabling communication.
-
-> [!CAUTION]
-> **Recheck joint mapping parameters!<br>Recheck rl_sar/policy/himloco/config.yaml. The default joint mapping in Sim2Sim configuration differs from that used in real. If not updated accordingly, this mismatch may lead to incorrect robot behavior and potential safety hazards**
-
-Lite3 also support control using Deeprobotics Retroid gamepad, refer to [Deeprobotics Gamepad](https://github.com/DeepRoboticsLab/gamepad)
-
-Open a new terminal and start the control program
+连接 WiFi，设置 `rl_real_lite3.cpp` 及 `network.toml` 中配置对应的 IP，启动控制程序：
 
 ```bash
 # ROS1
@@ -489,30 +413,19 @@ ros2 run rl_sar rl_real_lite3
 
 <details>
 
-<summary>Agibot D1 (Click to expand)</summary>
+<summary>Agibot D1 人形机器人控制部署 (点击展开)</summary>
 
-D1 can be connected using wireless network.
+配置网络处于同网段下，修改机器人侧 `/opt/export/config/sdk_config.yaml` 文件的 `target_ip` 指向您的 PC 地址，并运行程序：
 
-- Connect to D1's WiFi (default SSID and password are on the label on the side of the robot)
-- Robot default IP: `192.168.234.1` (WiFi) or `192.168.168.168` (Ethernet)
-- You need to configure `/opt/export/config/sdk_config.yaml` on the robot side, set `target_ip` to your PC's IP
-
-**Network Configuration Steps:**
-
-1. SSH into the robot:
 ```bash
-ssh firefly@192.168.234.1  # Password: firefly
+ssh firefly@192.168.234.1  # 密码: firefly
 ```
 
-2. Modify SDK configuration file:
 ```bash
 vim /opt/export/config/sdk_config.yaml
 ```
-Change `target_ip` to your PC's IP address (e.g., `192.168.234.2`)
 
-3. Reboot the robot for the configuration to take effect
-
-**Run the control program:**
+执行实物控制节点：
 
 ```bash
 # ROS1
@@ -526,33 +439,30 @@ ros2 run rl_sar rl_real_d1 [local_ip] [robot_ip]
 # CMake
 ./cmake_build/bin/rl_real_d1 [local_ip] [robot_ip]
 
-# Example (using default IP)
+# 例如（使用默认 IP 执行）
 ./cmake_build/bin/rl_real_d1 192.168.234.2 192.168.234.1
 ```
 
 </details>
 
-### Train the actuator network
+### 执行机构/关节动力学网络训练 (Actuator Network Training)
 
-Take A1 as an example below
+收集机器人关节运动数据记录为 `motor.csv` 并进行网络训练和离线重放：
 
-1. Uncomment `#define CSV_LOGGER` in the top of `rl_real_a1.hpp`. You can also modify the corresponding part in the simulation program to collect simulation data for testing the training process.
-2. Run the control program, and the program will log all data in `src/rl_sar/policy/<ROBOT>/motor.csv`.
-3. Stop the control program and start training the actuator network. Note that `rl_sar/src/rl_sar/policy/` is omitted before the following paths.
-    ```bash
-    rosrun rl_sar actuator_net.py --mode train --data a1/motor.csv --output a1/motor.pt
-    ```
-4. Verify the trained actuator network.
-    ```bash
-    rosrun rl_sar actuator_net.py --mode play --data a1/motor.csv --output a1/motor.pt
-    ```
+```bash
+# 训练动力学网络
+rosrun rl_sar actuator_net.py --mode train --data a1/motor.csv --output a1/motor.pt
 
-## Add Your Robot
+# 验证与回放动力学仿真
+rosrun rl_sar actuator_net.py --mode play --data a1/motor.csv --output a1/motor.pt
+```
 
-The following uses **\<ROBOT\>/\<CONFIG\>** to represent your robot environment. You only need to create or modify the following files, and the names must exactly match those shown below. (You can refer to the corresponding files in go2w as examples.)
+## 新建机器人适配 (Add Your Robot)
+
+为了接入新的自定义机器人，您需要创建并配置如下的机器人描述文件、策略网络、状态机和运行节点：
 
 ```yaml
-# your robot description
+# 机器人几何描述配置文件
 rl_sar/src/rl_sar_zoo/<ROBOT>_description/CMakeLists.txt
 rl_sar/src/rl_sar_zoo/<ROBOT>_description/package.ros1.xml
 rl_sar/src/rl_sar_zoo/<ROBOT>_description/package.ros2.xml
@@ -561,29 +471,27 @@ rl_sar/src/rl_sar_zoo/<ROBOT>_description/xacro/gazebo.xacro
 rl_sar/src/rl_sar_zoo/<ROBOT>_description/config/robot_control.yaml
 rl_sar/src/rl_sar_zoo/<ROBOT>_description/config/robot_control_ros2.yaml
 
-# your policy
-policy/<ROBOT>/base.yaml  # This file must follow the physical robot's joint order
+# 策略控制与网络配置文件
+policy/<ROBOT>/base.yaml
 policy/<ROBOT>/<CONFIG>/config.yaml
-policy/<ROBOT>/<CONFIG>/<POLICY>.pt  # for libtorch, note that exporting JIT is required
-policy/<ROBOT>/<CONFIG>/<POLICY>.onnx  # for onnxruntime
+policy/<ROBOT>/<CONFIG>/<POLICY>.pt
+policy/<ROBOT>/<CONFIG>/<POLICY>.onnx
 
-# fsm for robot
+# 机器人有限状态机代码
 src/rl_sar/fsm_robot/fsm_<ROBOT>.hpp
 src/rl_sar/fsm_robot/fsm_all.hpp
 
-# your real robot code
-rl_sar/src/rl_sar/src/rl_real_<ROBOT>.cpp  # You can customize the forward() function as needed to adapt to your policy
+# 实物控制源文件
+rl_sar/src/rl_sar/src/rl_real_<ROBOT>.cpp
 ```
 
-## Contributing
+## 贡献 (Contributing)
 
-Wholeheartedly welcome contributions from the community to make this framework mature and useful for everyone. These may happen as bug reports, feature requests, or code contributions.
+本框架欢迎并感谢社区的任何贡献，如 Bug 反馈、新增机器人适配或代码 Pull Request。
 
-[List of contributors](CONTRIBUTORS.md)
+## 引用 (Citation)
 
-## Citation
-
-Please cite the following if you use this code or parts of it:
+如果您在您的研究中使用本仓库代码，请按以下格式引用：
 
 ```
 @software{fan-ziqi2024rl_sar,
@@ -594,9 +502,9 @@ Please cite the following if you use this code or parts of it:
 }
 ```
 
-## Acknowledgements
+## 致谢 (Acknowledgements)
 
-The project uses some code from the following open-source code repositories:
+本项目对以下优秀的机器人开源项目及其作者表示诚挚的感谢：
 
 - [unitreerobotics/unitree_sdk2-2.0.0](https://github.com/unitreerobotics/unitree_sdk2/tree/2.0.0)
 - [unitreerobotics/unitree_legged_sdk-v3.2](https://github.com/unitreerobotics/unitree_legged_sdk/tree/v3.2)
